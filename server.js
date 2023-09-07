@@ -1,10 +1,24 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const fruits = require('./models/fruits');
+const Fruit = require('./models/fruit');
+const vegetables = require('./models/vegetables')
+const mongoose = require('mongoose')
+
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+mongoose.connection.once("open", () => {
+  console.log("breached through their firewall, connected to the mongo server >:)")
+})
+
+
+console.log(process.env.ENVVAR)
 
 const jsxViewEngine = require('jsx-view-engine');
-
 app.set('view engine', 'jsx');
 app.set('views', './views');
 app.engine('jsx', jsxViewEngine());
@@ -61,6 +75,31 @@ app.get('/fruits/:id', (req, res) => {
   res.render('fruits/Show', {
     //there will be a variable available inside the jsx file called fruit, its value is fruits[req.params.indexOfFruitsArray]
     fruit: fruits[req.params.id],
+  });
+});
+
+app.get('/vegetables', (req, res) => {
+  console.log('Index controller');
+  res.render('vegetables/Index', { vegetables });
+});
+
+app.get('/vegetables/new', (req, res) => {
+  console.log('New controller');
+  res.render('vegetables/New');
+});
+
+app.post('/vegetables', (req, res) => {
+  req.body.readyToEat = req.body.readyToEat === 'on';
+
+  vegetables.push(req.body);
+  console.log(vegetables);
+
+  res.redirect('/vegetables');
+});
+
+app.get('/vegetables/:id', (req, res) => {
+  res.render('vegetables/Show', {
+  vegetable: vegetables[req.params.id],
   });
 });
 

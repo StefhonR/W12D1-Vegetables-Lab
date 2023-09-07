@@ -16,7 +16,7 @@ class Show extends React.Component {
             "It is not ready to eat... Cant touch this"
         }
         </div>
-       
+      
         <img src={img} alt="" />
       </div>
     );
