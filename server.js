@@ -6,7 +6,6 @@ const Fruit = require('./models/fruit');
 const vegetables = require('./models/vegetables')
 const mongoose = require('mongoose')
 
-
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -37,9 +36,16 @@ app.use(express.urlencoded({ extended: false }));
 // };
 
 // Index
-app.get('/fruits', (req, res) => {
-  console.log('Index controller');
-  res.render('fruits/Index', { fruits });
+app.get('/fruits', async (req, res) => {
+  try {
+    const foundFruits = await Fruit.find({})
+    console.log(foundFruits)
+    res.status(200).render('fruits/Index', {
+      fruits: foundFruits
+    })
+  } catch (err) {
+    res.status(400).send(err)
+  }
 });
 
 // New
@@ -53,29 +59,40 @@ app.get('/fruits/new', (req, res) => {
 // Update
 
 // Create
-app.post('/fruits', (req, res) => {
-  // if(req.body.readyToEat === 'on'){ //if checked, req.body.readyToEat is set to 'on'
-  //   req.body.readyToEat = true; //do some data correction
-  // } else { //if not checked, req.body.readyToEat is undefined
-  //   req.body.readyToEat = false; //do some data correction
-  // }
-  req.body.readyToEat = req.body.readyToEat === 'on';
+app.post('/fruits', async (req, res) => {
+  try {
+    // if(req.body.readyToEat === 'on'){ //if checked, req.body.readyToEat is set to 'on'
+    //   req.body.readyToEat = true; //do some data correction
+    // } else { //if not checked, req.body.readyToEat is undefined
+    //   req.body.readyToEat = false; //do some data correction
+    // }
+    req.body.readyToEat = req.body.readyToEat === 'on';
 
-  fruits.push(req.body);
-  console.log(fruits);
+    const createdFruit = await Fruit.create(req.body)
 
-  res.redirect('/fruits'); // send the user back to /fruits
+    res.status(201).redirect('/fruits')
+  } catch (err) {
+    res.status(400).send(err)
+  }
+
+  
 });
 
 // Edit
 
 // Show
-app.get('/fruits/:id', (req, res) => {
-  //second param of the render method must be an object
-  res.render('fruits/Show', {
-    //there will be a variable available inside the jsx file called fruit, its value is fruits[req.params.indexOfFruitsArray]
-    fruit: fruits[req.params.id],
-  });
+app.get('/fruits/:id', async (req, res) => {
+  try {
+    const foundFruit = await Fruit.findById(req.params.id)
+    //second param of the render method must be an object
+    res.render('fruits/Show', {
+      //there will be a variable available inside the jsx file called fruit, its value is fruits[req.params.indexOfFruitsArray]
+      fruit: foundFruit,
+    });
+  } catch (err) {
+    res.status(400).send(err)
+  }
+  
 });
 
 app.get('/vegetables', (req, res) => {

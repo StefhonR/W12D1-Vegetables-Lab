@@ -16,7 +16,7 @@ class Index extends React.Component {
               return (
                 <li key={i}>
                   The{' '}
-                    <a href={`/fruits/${i}`}>
+                    <a href={`/fruits/${fruit._id}`}>
                       {fruit.name}
                     </a>
                     {' '}
