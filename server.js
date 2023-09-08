@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const Fruit = require('./models/fruit');
-const vegetables = require('./models/vegetables')
+const Vegetable = require('./models/vegetable')
 const mongoose = require('mongoose')
 
 mongoose.connect(process.env.MONGO_URI, {
@@ -95,29 +95,56 @@ app.get('/fruits/:id', async (req, res) => {
   
 });
 
-app.get('/vegetables', (req, res) => {
-  console.log('Index controller');
-  res.render('vegetables/Index', { vegetables });
+/////////////////////////
+//////VEGETABLES/////////
+/////////////////////////
+
+
+//Index
+app.get('/vegetables', async (req, res) => {
+  try {
+    const foundVegetables = await Vegetable.find({})
+    console.log(foundVegetables)
+    res.status(200).render('vegetables/Index', {
+      vegetables: foundVegetables
+    })
+  } catch (err) {
+    res.status(400).send(err)
+  }
 });
 
+//New
 app.get('/vegetables/new', (req, res) => {
   console.log('New controller');
   res.render('vegetables/New');
 });
 
-app.post('/vegetables', (req, res) => {
-  req.body.readyToEat = req.body.readyToEat === 'on';
+//Create
+app.post('/vegetables', async (req, res) => {
+  try {
+    req.body.readyToEat = req.body.readyToEat === 'on';
 
-  vegetables.push(req.body);
-  console.log(vegetables);
+    const createdVegetable = await Vegetable.create(req.body)
 
-  res.redirect('/vegetables');
+    res.status(201).redirect('/vegetables')
+  } catch (err) {
+    res.status(400).send(err)
+  }
+
+  
 });
 
-app.get('/vegetables/:id', (req, res) => {
-  res.render('vegetables/Show', {
-  vegetable: vegetables[req.params.id],
-  });
+//Show
+app.get('/vegetables/:id', async (req, res) => {
+  try {
+    const foundVegetable = await Vegetable.findById(req.params.id)
+    res.render('vegetables/Show', {
+      vegetable: foundVegetable,
+    });
+  } catch (err) {
+    res.status(400).send(err)
+  }
+  
 });
 
 app.listen(PORT, () => {
